@@ -1,6 +1,8 @@
 from passlib.context import CryptContext #pip install passlib[bcrypt]
 import random, string
 import boto3
+from .config import settings
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -24,11 +26,11 @@ def create_new_name(filename):
 # Upload file to aws s3 with boto3
 def upload_file(filename):
     # Creating Session With Boto3.
-    session = boto3.Session(aws_access_key_id='AKIA4E4WMJX223ZOY3II',aws_secret_access_key='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')
+    session = boto3.Session(aws_access_key_id=settings.aws_access_key_id,aws_secret_access_key=settings.aws_secret_access_key)
     # Creating S3 Resource From the Session.
     s3 = session.resource('s3')
 
-    result = s3.Bucket('est-fbs-blogs-bucket').upload_file(f'media/images/{filename}', f'new/{filename}')
+    result = s3.Bucket(settings.aws_bucket_name).upload_file(f'media/images/{filename}', f'new/{filename}')
     print(result)
     path = f'https://est-fbs-blogs-bucket.s3.us-east-2.amazonaws.com/new/{filename}'
     return path
