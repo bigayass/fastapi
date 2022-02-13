@@ -85,3 +85,4 @@ class Vote(BaseModel):
 class FileData(BaseModel):
     author: str = None
     size: str = None
+    path: str = None
