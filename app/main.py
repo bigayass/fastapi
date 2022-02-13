@@ -1,11 +1,15 @@
 
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from . import models
 from .database import engine
 from .routers import post, user, auth, vote
-
+from . import schemas
+import boto3
+from fastapi.responses import JSONResponse, FileResponse
+from os import getcwd
+from .utils import create_new_name, upload_file
 
 
 # Create all tables from our models
@@ -32,6 +36,65 @@ app.include_router(vote.router)
 @app.get("/")
 async def root():
     return {'message': "Social Media API"}
+
+@app.post("/files/")
+def create_file(file: bytes = File(...)):
+    return {"file_size": len(file)}
+
+
+# @app.post("/uploadfile/")
+# def create_upload_file(author: str = Form(...), size: str = Form(...), file: UploadFile = File(...)):
+    
+#     return {"filename": file.filename, 'properties': schemas.FileData(size=size,author=author)}
+
+@app.post("/uploadfile/")
+async def create_upload_file(author: str = Form(...), size: str = Form(...), file: UploadFile = File(...)):
+
+    # Create the new name
+    new_name = create_new_name(file.filename)
+
+    # save the file in media/image folder
+    with open(f'media/images/{new_name}', 'wb') as image:
+        content = await file.read()
+        image.write(content)
+        image.close()
+
+    path = upload_file(new_name)
+
+    return {"filename": file.filename, 'properties': schemas.FileData(size=size,author=author,path=path)}
+
+# @app.post("/uploadfile/")
+# async def create_upload_file(author: str = Form(...), size: str = Form(...), file: UploadFile = File(...)):
+
+#     # Create the new name
+#     new_name = create_new_name(file.filename)
+
+#     # save the file in media/image folder
+#     with open(f'media/images/{new_name}', 'wb') as image:
+#         content = await file.read()
+#         image.write(content)
+#         image.close()
+
+#     path = upload_file(new_name)
+
+#     return {"filename": file.filename, 'properties': schemas.FileData(size=size,author=author,path=path)}
+
+
+
+# @app.post("/upload/")
+# async def upload_file(file: UploadFile = File(...)):
+#     with open(f'media/images/{file.filename}', 'wb') as image:
+#         content = await file.read()
+#         image.write(content)
+#         image.close()
+#     return JSONResponse(content={"filename": file.filename}, status_code=200)
+
+
+
+@app.get("/download/{name_file}")
+def download_file(name_file: str):
+    return FileResponse(path=getcwd() + "/media/images/" + name_file, media_type='application/octet-stream', filename=name_file)
+
 
 
 

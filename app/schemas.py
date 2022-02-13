@@ -1,4 +1,4 @@
-
+from fastapi import File, UploadFile
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional
@@ -80,3 +80,8 @@ class TokenData(BaseModel):
 class Vote(BaseModel):
     post_id: int
     dir: conint(le=1) # default = 1
+
+
+class FileData(BaseModel):
+    author: str = None
+    size: str = None

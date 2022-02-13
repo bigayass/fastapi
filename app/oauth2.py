@@ -18,6 +18,7 @@ ALGORITHM = settings.algorithm
 
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
+
 # Function that create our JWT  
 def create_access_token(data: dict):
     # copy the dictionary into "to_ecoded"
